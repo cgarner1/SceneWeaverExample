@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<dset id="1" code="Human Readable name" pull="sequential" textSpeed="1" >
+  <choice>
+    <option displayCheckType="any" chooseCheckType="any">
+      <chooseCheck fact="FACT_CODE" op="gt" val="17"/>
+      <text>option display text1</text>
+      <path>
+        <line textSpeed="2" speakerId="ZUES">
+          <text>text1 chosen.</text>
+        </line>
+        <line textSpeed="2" speakerId="ZUES">
+          <text>new line...</text >
+        </line>
+      </path>
+    </option>
+
+    <option checkType="all" chooseCheckType="any">
+      <chooseCheck fact="FACT_CODE2" op="eq" val="1"/>
+      <displayCheck fact="FACT_CODE3" op="lte" val="1" />
+      <text>option 2</text>
+      <path>
+        <line textSpeed="2" speakerId="ZUES">
+          <text textSpeed="2" speakerId="ZUES">option2 chosen.</text>
+        </line>
+      </path>
+    </option>
+  </choice>
+  <line textSpeed="2" speakerId="ZUES">
+    <text>back to main branch line</text>
+  </line>
+ </dset>

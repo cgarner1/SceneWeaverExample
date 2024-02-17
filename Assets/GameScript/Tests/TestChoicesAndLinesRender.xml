@@ -1,0 +1,58 @@
+<data>
+  <head>
+    <identifiers id="1" ref="ScriptExample.xml"/>
+    <tag ref="responses"/>
+    <!-- "tag" can be used as an easy include for intercutting lines-->
+    <include ref=""/>
+    <!-- should refer to includes by thier ref tag under identifiers -->
+    <includeTag ref="otherfile.xml" />
+    <OnEvent id="1"/>
+
+  </head>
+
+  <dialogue>
+    <dset id="1" code="Human Readable name" pull="sequential" textSpeed="1" >
+
+
+      <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
+        <text prePause="0" textSpeed="1">Test If Choices Render</text>
+      </line>
+      
+      <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
+        <text prePause="0" textSpeed="1">This is a line</text>
+      </line>
+      
+      <choice>
+        <option displayCheckType="any" choiceCheckType="any">
+          <choiceCheck fact="FACT_CODE" op="gt" val="17"/>
+          <text>this should display a choice as an option</text>
+        </option>
+      
+        <option checkType="all" choiceCheckType="any">
+          <choiceCheck fact="FACT_CODE" op="gt" val="4"/>
+          <choiceCheck fact="FACT_CODE2" op="eq" val="1"/>
+          <displayCheck fact="FACT_CODE3" op="lte" val="1" />
+          <text>This should display a choice as an option</text>
+          <update factId="3" set="++"/>
+        </option>
+
+        <option checkType="all" choiceCheckType="any">
+          <choiceCheck fact="FACT_CODE" op="gt" val="4"/>
+          <choiceCheck fact="FACT_CODE2" op="eq" val="1"/>
+          <displayCheck fact="FACT_CODE3" op="lte" val="1" />
+          <text>This should display a choice as an option</text>
+          <update factId="3" set="++"/>
+        </option>
+      </choice>
+      
+      <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
+        <text prePause="0" textSpeed="1">This is a line</text>
+      </line>
+      
+      <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
+        <text prePause="0" textSpeed="1">This is a line 2</text>
+      </line>
+
+    </dset>
+  </dialogue>
+</data>

@@ -1,0 +1,99 @@
+﻿<data>
+  <head>
+    <identifiers id="1" ref="ScriptExample.xml"/>
+    <tag ref="responses"/>
+    <!-- "tag" can be used as an easy include for intercutting lines-->
+    <include ref=""/>
+    <!-- should refer to includes by thier ref tag under identifiers -->
+    <includeTag ref="otherfile.xml" />
+    <OnEvent id="1"/>
+
+  </head>
+
+  <dialougueSets>
+    <dset id="1" code="Human Readable name" pull="sequential" textSpeed="1" >
+
+
+      <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
+        <text prePause="0" textSpeed="1">Test if increment works</text>
+      </line>
+      
+
+      <branch>
+        <path checkType="any">
+          <check fact="fact_000" op="eq" val="6543"/>
+          <line speakerId="Default">
+            <text>This line should not show - eq 6543 -> expect 0</text>
+          </line>
+        </path>
+      </branch>
+
+      <line  speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
+        <text prePause="0" textSpeed="1">This line increments fact_000 to 1</text>
+        <update factId="fact_000" set="++"/>
+      </line>
+
+      <branch>
+        <path checkType="any">
+          <check fact="fact_000" op="eq" val="2"/>
+          <line speakerId="Default"  textSpeed="2" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
+            <text>This line should not show eq 2 expect 1</text>
+          </line>
+        </path>
+        <path checkType="any">
+          <check fact="fact_000" op="eq" val="1"/>
+          <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
+            <text>This line should show - expect 1</text>
+          </line>
+        </path>
+      </branch>
+
+
+      <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
+        <text prePause="0" textSpeed="1">This line decrements fact_000 to 0</text>
+        <update factId="fact_000" set="--"/>
+      </line>
+
+      <branch>
+        <path checkType="any">
+          <check fact="fact_000" op="eq" val="-1"/>
+          <line speakerId="Default">
+            <text>This line should not show eq -1</text>
+          </line>
+        </path>
+        <path checkType="any">
+          <check fact="fact_000" op="eq" val="0"/>
+          <line speakerId="Default" textSpeed="1">
+            <text>This line should show eq 0</text>
+          </line>
+        </path>
+      </branch>
+      
+      
+
+      <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
+        <text prePause="0" textSpeed="1">This line sets fact_000 to 218</text>
+        <update factId="fact_000" set="218"/>
+      </line>
+
+
+      <branch>
+        <path checkType="any">
+          <check fact="fact_000" op="eq" val="217"/>
+          <line speakerId="Default">
+            <text>This line should not show</text>
+          </line>
+        </path>
+        <path checkType="any">
+          <check fact="fact_000" op="eq" val="218"/>
+          <line speakerId="Default">
+            <text>This line should show</text>
+          </line>
+        </path>
+      </branch>
+      
+
+
+    </dset>
+  </dialougueSets>
+</data>

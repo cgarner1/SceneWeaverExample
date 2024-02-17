@@ -1,0 +1,43 @@
+<data>
+  <head>
+    <identifiers id="1" ref="ScriptExample.xml"/>
+    <tag ref="responses"/> <!-- "tag" can be used as an easy include for intercutting lines-->
+    <include ref=""/>
+    <!-- should refer to includes by thier ref tag under identifiers -->
+    <includeTag ref="otherfile.xml" />
+    <OnEvent id="1"/>
+
+  </head>
+
+  <!-- id for dSets should be assigned by another tool. -->
+  <dialougueSets>
+    <!-- dset is a dialougue set. Group of dialouge related in some fashion -> a set of dialouge to play after a stat check, plays under a specific circumstance, etc -->
+    <!-- options for pulling the next tag: [sequential, random, wRandom] wRandom requires weights to be assigned to each dLine -->
+    <dset id="1" code="Human Readable name" pull="sequential" textSpeed="1" >
+
+      <!-- text speed not required here, but will override parent -->
+      <!-- playSound, playMusic, playAnim, prePuase optional -->
+      <!-- if "hasBeenPlayed is not specified, it's expected false. This will oly be updated via code"-->
+      <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
+        <text prePause="0.3" textSound="overideSpeakerTextSoundHere">
+          Lorem ipsum dolor sit <i>amet</i>, consectetur <color hex="#AE1234">adipiscing</color> elit,
+        </text>
+        <text prePause="0" textSpeed="1">sed do eiusmod tempor incididunt ut labore...</text>
+      </line>
+
+      <!-- forceplay next will play the next line immediatley, without player action-->
+      <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" forcePlayNext="true">
+        <text prePause="0.3" textSound="overideSpeakerTextSoundHere">
+          Lorem ipsum dolor sit <i>amet</i>, consectetur <color hex="#AE1234">adipiscing</color> elit,
+        </text>
+        <text prePause="0" textSpeed="1">sed do eiusmod tempor incididunt ut labore...</text>
+      </line>
+
+
+      <line textSpeed="4" speakerId="MRGT">
+        <text>Sed ut perspiciatis unde omnis iste natus error sit voluptatem... </text>
+        <text>accusantium doloremque laudantium, totam rem aperiam,</text>
+      </line>
+    </dset>
+  </dialougueSets>
+</data>

@@ -1,0 +1,68 @@
+# Unity generated files
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+*.cache
+
+# MemoryCaptures can get excessive in size
+*.mem
+
+# Auto-generated project files
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+
+# Build artifacts
+*.apk
+*.unitypackage
+
+# iOS
+*.DS_Store
+*/._*
+
+# Android
+*.apk
+*.aab
+*.gradle
+*/build/
+
+# Windows
+*.exe
+*.pdb
+*.dll
+*.res
+
+# macOS
+*.dmg
+*.app
+
+# Visual Studio Code
+.vscode/
+
+# Visual Studio files
+.vs/
+.vsconfig
+
+# Rider
+.idea/
+
+# Thumbnails
+._*
+
+# Ignore sound files
+*.off
+*.wav
+
+# Allow PNG, JPG, and JPEG files in all directories
+!*.{png,jpg,jpeg}

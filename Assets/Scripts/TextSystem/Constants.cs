@@ -8,7 +8,14 @@ namespace Assets.Scripts.TextSystem
 {
     class Constants
     {
-        public const float DEFAULT_CHARACTERS_PER_SEC = 11f;
+        public const float DEFAULT_CHARACTERS_PER_SEC = 6f;
+        public readonly Dictionary<string, float> characterToTypeWriterPrePause = new Dictionary<string, float>()
+        {
+            { ",", 1f},
+            { "...", 1f},
+            { ";", 1f},
+            {"--", 1f }
+        };
         public const string DSET_TAG = "dset";
         public const string DLINE_TAG = "line";
         public const string BRANCH_TAG = "branch";

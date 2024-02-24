@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,68 +32,55 @@ namespace Assets.Scripts.TextSystem.SceneWeaver
         private DialogueLine currentLine;
         private StringBuilder sb = new StringBuilder();
 
+        /// <summary>
+        /// Each time this runs, it adds a SINGLE character. It also handles things like playing audio, pre-pauses for specific characters, etc.
+        /// </summary>
+        /// <param name="textSpeedMultiplier"></param>
+        /// <returns></returns>
+        IEnumerator TypeWriterTextRoutine(float textSpeedMultiplier = 1f)
+        {
+            isWriting = true;
+            while (!IsTextBlockComplete())
+            {
+                shownCharsInTextBlock++;
+                string currentText = CreateStringFromTextBlocks(true);
+                uiController.UpdateMostRecentTextBoxElement(currentText);
+                // todo -> handle pre-pause defined by some non-alphanumeric characters.
+                
+                // we want spaces to be empty to add rythm to speach.
+                if(!char.IsWhiteSpace(this.currentLine.textBlocks[textBlockIdx].Text[(int)shownCharsInTextBlock - 1])) {
+                    audioManager.Play(AudioConstants.textAndSpeachAudioClipName);
+                }
+                yield return new WaitForSeconds(1 / Constants.DEFAULT_CHARACTERS_PER_SEC / textSpeedMultiplier);
+            }
+
+            if (DialogueLineHasNewTextBlock())
+            {
+                textBlockIdx++; // todo -> handle things like text speed changes, audio queues, scene effects
+                StartCoroutine(TypeWriterTextRoutine(textSpeedMultiplier));
+            } else
+            {
+                OnLineIsComplete();
+            }
+            yield break;
+        }
+
         public void SetDLine(DialogueLine line)
         {
             this.currentLine = line;
             textSpeed = line.TextSpeed;
+            //StartCoroutine(TypeWriterTextRoutine(line.TextSpeed));
+            StartCoroutine(TypeWriterTextRoutine(line.TextSpeed));
         }
 
-        public void UpdateMostRecentLine()
+        private bool IsTextBlockComplete()
         {
-            
-            if (currentLine != null)
-            {
-                isWriting = true;
-                if (currentPrePause > 0)
-                {
-                    currentPrePause -= Time.deltaTime;
-                    return;
-                }
+            return this.shownCharsInTextBlock >= currentLine.textBlocks[textBlockIdx].Text.Length;
+        }
 
-                // TODO -> we need to know WHEN a new character shows up on screen. Once we know we can play the appropriate sound effect for text.
-                // we will also need to take into account if we are showing a character or not. Only make noise if A-Za-z.
-                // prob rewrite as coroutine.
-                shownCharsInTextBlock = (shownCharsInTextBlock + (Constants.DEFAULT_CHARACTERS_PER_SEC * textSpeed) * Time.deltaTime);
-
-                bool lineIsFinished = false;
-                // don't want to hop over the next text block at slow framerate
-                while (shownCharsInTextBlock > currentLine.textBlocks[textBlockIdx].Text.Length)
-                {
-                    // we don't want to interupt flow when moving to next tetx block
-                    shownCharsInTextBlock = shownCharsInTextBlock - currentLine.textBlocks[textBlockIdx].Text.Length; 
-                    textBlockIdx++;
-
-
-                    // if we've gone over the length of the line
-                    if(textBlockIdx >= currentLine.textBlocks.Count)
-                    {
-                        textBlockIdx--;
-                        shownCharsInTextBlock = currentLine.textBlocks[textBlockIdx].Text.Length;
-                        lineIsFinished = true;
-                        break;
-                    }
-
-                    // need to take into account the text pause
-                    if (currentLine.textBlocks[textBlockIdx].PrePause.HasValue)
-                    {
-                        shownCharsInTextBlock = 0;
-                        this.currentPrePause = currentLine.textBlocks[textBlockIdx].PrePause.Value;
-                        string result = CreateStringFromTextBlocks(false);
-                        uiController.UpdateMostRecentTextBoxElement(result);
-                        return;
-                    }
-                }
-
-                string returnText = CreateStringFromTextBlocks();
-
-                //string text = currentLine.FullLineText.Substring(0, (int)shownChars);
-                uiController.UpdateMostRecentTextBoxElement(returnText); // could maybe update the renderer itself?
-                
-                if (lineIsFinished)
-                {
-                    OnLineIsComplete();
-                }
-            }
+        private bool DialogueLineHasNewTextBlock()
+        {
+            return this.textBlockIdx < this.currentLine.textBlocks.Count -1;
         }
 
         private string CreateStringFromTextBlocks(bool includeCurrent = true)
@@ -144,7 +132,7 @@ namespace Assets.Scripts.TextSystem.SceneWeaver
         {
             if (writeToScreen)
             {
-                UpdateMostRecentLine();
+                // UpdateMostRecentLine();
             }
            
         }

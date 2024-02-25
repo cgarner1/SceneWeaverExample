@@ -13,9 +13,11 @@ public class SpeachTester : MonoBehaviour
     void Start()
     {
 
-        // SceneWeaver.GetInstance().LoadScene("Tests/TestFactsUpdateByLine 1");
+        // SceneWeaver.GetInstance().LoadScene("Tests/TestFactsUpdateByLine_1");
+        // SceneWeaver.GetInstance().LoadScene("ScriptExample");
+        // SceneWeaver.GetInstance().LoadScene("Tests/check_basic_line_ordering");
         SceneWeaver.GetInstance().LoadScene("Tests/TestChoicesAndLinesRender");
-        //SceneWeaver.GetInstance().LoadScene("Tests/check_basic_line_ordering");
+
     }
 
     // Update is called once per frame

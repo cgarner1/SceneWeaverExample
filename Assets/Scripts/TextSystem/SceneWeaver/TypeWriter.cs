@@ -24,7 +24,11 @@ namespace Assets.Scripts.TextSystem.SceneWeaver
         float shownCharsInTextBlock = 0;
         private int textBlockIdx = 0;
         private bool writeToScreen = true;
+        [HideInInspector]
         public bool isWriting = false;
+        [HideInInspector]
+        public bool IsAwaitingChoice { get; set; }
+        
         private float textSpeed = 1f; // todo const default speed 
         private float currentPrePause = 0f;
 
@@ -46,18 +50,53 @@ namespace Assets.Scripts.TextSystem.SceneWeaver
                 string currentText = CreateStringFromTextBlocks(true);
                 uiController.UpdateMostRecentTextBoxElement(currentText);
                 // todo -> handle pre-pause defined by some non-alphanumeric characters.
-                
+
                 // we want spaces to be empty to add rythm to speach.
-                if(!char.IsWhiteSpace(this.currentLine.textBlocks[textBlockIdx].Text[(int)shownCharsInTextBlock - 1])) {
+                char characterAdded = this.currentLine.textBlocks[textBlockIdx].Text[(int)shownCharsInTextBlock - 1];
+                if (!char.IsWhiteSpace(characterAdded)) {
                     audioManager.Play(AudioConstants.textAndSpeachAudioClipName);
                 }
+
+                // pre-pause on certain letters.
+                if (Constants.CHARACTER_TO_PREPAUSE.ContainsKey(characterAdded.ToString()))
+                {
+                    yield return new WaitForSeconds(Constants.CHARACTER_TO_PREPAUSE[characterAdded.ToString()]);
+                    continue;
+                }
+
+                // pre-pause on GROUPS of letters. We look back to check for things like ellipses, double dashes. TODO -> do with substring and a single check.
+                // ellipses check. Character added always sits at the END of textblock.
+                if (characterAdded == '.' 
+                    && this.currentLine.textBlocks[textBlockIdx].Text.Length >= 3 &&
+                    this.currentLine.textBlocks[textBlockIdx].Text[(int)shownCharsInTextBlock - 2] == '.' && 
+                    this.currentLine.textBlocks[textBlockIdx].Text[(int)shownCharsInTextBlock - 3] == '.')
+                {
+                    yield return new WaitForSeconds(Constants.CHARACTER_TO_PREPAUSE["..."]);
+                    continue;
+                }
+
+                // double dash check. Character added always sits at the END of textblock.
+                if(characterAdded == '-' && 
+                    this.currentLine.textBlocks[textBlockIdx].Text.Length >= 2 &&
+                    this.currentLine.textBlocks[textBlockIdx].Text[(int)shownCharsInTextBlock -2] == '-')
+                {
+                    yield return new WaitForSeconds(Constants.CHARACTER_TO_PREPAUSE["--"]);
+                    continue;
+                }
+
                 yield return new WaitForSeconds(1 / Constants.DEFAULT_CHARACTERS_PER_SEC / textSpeedMultiplier);
             }
 
             if (DialogueLineHasNewTextBlock())
             {
                 textBlockIdx++; // todo -> handle things like text speed changes, audio queues, scene effects
-                StartCoroutine(TypeWriterTextRoutine(textSpeedMultiplier));
+                float textSpeed = 1;
+                shownCharsInTextBlock = 0;
+
+                // prioritize textBlock attributes, if specified.
+                textSpeed = currentLine.textBlocks[textBlockIdx].TextSpeed.HasValue ? currentLine.textBlocks[textBlockIdx].TextSpeed.Value : currentLine.TextSpeed;
+
+                StartCoroutine(TypeWriterTextRoutine(textSpeed));
             } else
             {
                 OnLineIsComplete();
@@ -65,11 +104,15 @@ namespace Assets.Scripts.TextSystem.SceneWeaver
             yield break;
         }
 
-        public void SetDLine(DialogueLine line)
+        public void BeginTypeWriting(DialogueLine line)
         {
+            // we dont want to replace a line. We could have an option to write the entire line if someone clicks, but as of right now thats not a neccesary feature.
+
             this.currentLine = line;
             textSpeed = line.TextSpeed;
-            //StartCoroutine(TypeWriterTextRoutine(line.TextSpeed));
+            textSpeed = line.textBlocks[textBlockIdx].TextSpeed.HasValue ? line.textBlocks[textBlockIdx].TextSpeed.Value : line.TextSpeed;
+            // todo -> update the speaker on UI.
+
             StartCoroutine(TypeWriterTextRoutine(line.TextSpeed));
         }
 
@@ -106,6 +149,7 @@ namespace Assets.Scripts.TextSystem.SceneWeaver
             return result;
         }
 
+        // currently broken. Will nullref.
         public void FinishLine()
         {
             uiController.UpdateMostRecentTextBoxElement(currentLine.FullLineText);
@@ -119,6 +163,7 @@ namespace Assets.Scripts.TextSystem.SceneWeaver
             textSpeed = 1f;
             shownCharsInTextBlock = 0;
             isWriting = false;
+            textBlockIdx = 0;
 
             // TODO play sound?
         }

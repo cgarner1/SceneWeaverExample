@@ -13,7 +13,7 @@
   <dialogue>
     <!-- dset is a dialougue set. Group of dialouge related in some fashion -> a set of dialouge to play after a stat check, plays under a specific circumstance, etc -->
     <!-- options for pulling the next tag: [sequential, random, wRandom] wRandom requires weights to be assigned to each line -->
-    <dset id="0" code="Human Readable name" pull="sequential" textSpeed="1" >
+    <dset id="1" code="Human Readable name" pull="sequential" textSpeed="1" >
 
       <!-- text speed not required here, but will override parent -->
       <!-- playSound, playMusic, playAnim, prePuase optional -->

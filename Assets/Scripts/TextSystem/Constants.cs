@@ -9,9 +9,9 @@ namespace Assets.Scripts.TextSystem
     class Constants
     {
         public const float DEFAULT_CHARACTERS_PER_SEC = 6f;
-        public readonly Dictionary<string, float> characterToTypeWriterPrePause = new Dictionary<string, float>()
+        public static readonly Dictionary<string, float> CHARACTER_TO_PREPAUSE = new Dictionary<string, float>()
         {
-            { ",", 1f},
+            { ",", 0.3f},
             { "...", 1f},
             { ";", 1f},
             {"--", 1f }

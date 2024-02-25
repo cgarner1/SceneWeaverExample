@@ -49,7 +49,14 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                 // TODO pull from parent
             }
 
-            this.SpeakerId = lineXML.Attributes["speakerId"].Value;
+            if(lineXML.Attributes["speakerId"] == null)
+            {
+                this.SpeakerId = "SYSTEM";
+            } else
+            {
+                this.SpeakerId = lineXML.Attributes["speakerId"].Value;
+            }
+            
 
             foreach (XmlNode lineXMLChild in lineXML.ChildNodes)
             {

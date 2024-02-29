@@ -10,6 +10,7 @@ using Assets.Scripts.Facts;
 using Assets.Scripts.TextSystem.Interfaces;
 using Assets.Scripts.UI.Interfaces;
 using Assets.Scripts.TextSystem.Utils;
+using Assets.Scripts.TextSystem.Choices;
 
 namespace Assets.Scripts.TextSystem.Models.Dialogue
 {
@@ -17,78 +18,46 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
     /// Dialogue nodes are directed graph nodes that have links to their next neighbors and previous nieghbors
     /// They contain a list of dialogue elements that can be choices, paths, or lines.
     /// </summary>
-    public class DialogueNode
+    public class DialogueNode : DialogueNodeAbstract
     {
         public TextSystemEnums.PullType PullType { get; set; }
         public TextSystemEnums.RuleCheckType CheckType { get; set; }
-        
-        public List<FactBasedTextRule> Rules { get; set; }
-
-        private int dialogueElementsIdx;
-       //  public List<TextBlock> TextLines { get; private set; }
-        public List<IDialogueModel> NextDialogueElements { get; set; } // each choice, line etc in this pathnode
-        public List<DialogueNode> nextPathNodes;
-        public List<DialogueNode> previousPathNodes;
-        public bool SkipToNextPathNode { get; set; } // controls if this node is skipped by our dialogue system
 
         public IVisElementRenderer VisElementRenderer { get; set; }
+        public List<FactBasedTextRule> Rules { get; set; }
 
 
-
-        // expected when a branch node shows
-        // <path></path>
-        public DialogueNode()
+        public DialogueNode() : base()
         {
-            this.dialogueElementsIdx = 0;
-            NextDialogueElements = new List<IDialogueModel>();
             //lines = new List<DialogueLine>();
             Rules = new List<FactBasedTextRule>();
-            previousPathNodes = new List<DialogueNode>();
-            nextPathNodes = new List<DialogueNode>();
-
-            // text tags
-            //ProcessTextNodes(dialgPath.ChildNodes, checkIdx);
-            //associatedSceneFragment.TextLineCount = dialgPath.ChildNodes.Count - checkIdx; // Possible off by 1
-
-            // add line by line until we hit a branch
-            // when we hit a branch, THIS PATH ENDS.
-            // ADD A REF TO NEXT PATH NODE, PREVIOUS PATH NODE
         }
 
-        /*
-        public void BuildNode(XmlNode dialgPathNode)
+        public DialogueNode(XmlNode pathXml) : base()
         {
-            switch (dialgPathNode.Attributes["checkType"].Value)
+            Rules = new List<FactBasedTextRule>();
+            string checkType = pathXml.Attributes[Constants.PATH_CHECK_TYPE].Value;
+
+            switch (checkType.ToLower())
             {
                 case "any":
-                    CheckType = TextSystemEnums.RuleCheckType.any;
+                    this.CheckType = Enums.TextSystemEnums.RuleCheckType.any;
                     break;
-
                 case "all":
-                    CheckType = TextSystemEnums.RuleCheckType.all;
+                    this.CheckType = Enums.TextSystemEnums.RuleCheckType.all;
                     break;
                 default:
-                    CheckType = TextSystemEnums.RuleCheckType.noCheck;
+                    this.CheckType = Enums.TextSystemEnums.RuleCheckType.noCheck;
                     break;
             }
-
-            // check tags
-            int checkIdx = 0;
-            while (checkIdx < dialgPathNode.ChildNodes.Count && dialgPathNode.ChildNodes[checkIdx].Name.Equals("check"))
-            {
-                Rules.Add(new FactBasedTextRule(dialgPathNode.ChildNodes[checkIdx].Attributes));
-                checkIdx++;
-            }
-
         }
-        */
 
         public void SetRuleCheckType(TextSystemEnums.RuleCheckType checkType)
         {
             this.CheckType = checkType;
         }
 
-        public void AddRule(XmlNode ruleNode)
+        public override void AddRule(XmlNode ruleNode)
         {
             Rules.Add(new FactBasedTextRule(ruleNode.Attributes));
         }
@@ -101,16 +70,6 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
         public void AddParent(DialogueNode parent)
         {
             this.previousPathNodes.Add(parent);
-        }
-
-        public void AddDLine(DialogueLine line)
-        {
-            //this.lines.Add(line);
-        }
-
-        public void AddDialogueElement(IDialogueModel dialogueModel)
-        {
-            this.NextDialogueElements.Add(dialogueModel);
         }
 
 
@@ -137,49 +96,30 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
             }
         }
         */
-        /// <summary>
-        /// Returns the dialogue model (choice, line etc) to apear next.
-        /// </summary>
-        /// <returns></returns>
-        public IDialogueModel TryGetCurrentDialogueElement()
-        {
-            try
-            {
-                IDialogueModel element = NextDialogueElements[dialogueElementsIdx];
-                return element;
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
-            
-        }
-
-        /// <summary>
-        /// Can we pull any more text from this dialogue node NOTY INCLUDING NEIGHBORS
-        /// </summary>
-        /// <returns></returns>
-        public bool HasAvailableElements()
-        {
-            return dialogueElementsIdx < NextDialogueElements.Count-1; // gets checked before moving forward
-        }
-
-        public bool HasNextDialogueNode()
-        {
-            return nextPathNodes != null && nextPathNodes.Count > 0;
-        }
 
         /// <summary>
         /// Meant to be called when a DSET has exhuasted a current node and needs to pick it next node.
         /// </summary>
         /// <returns>either the next node we need the DSET to move to, or null if we need to skip this node too.</returns>
-        public DialogueNode GetNextNodePathBasedOnFacts()
+        public DialogueNodeAbstract GetNextNode()
         {
             for(int i = 0; i < this.nextPathNodes.Count; i++)
             {
-                DialogueNode potentialPath = nextPathNodes[i];
+                DialogueNodeAbstract potentialPathAbstract = this.nextPathNodes[i]; // a dialogue node's next node
+                // messy, needs a minor rethink.
+                if(potentialPathAbstract is OptionDialogueNode || potentialPathAbstract is ChoiceSet)
+                {
+                    // for now -> we always choose choice simply bc we never ecpect to choose between a choice or a different path.
+                    // if you want to branch and then immediately give a choice, requires you to have a line first.
+                    // additionally, you should never get a option node back, as options are always children of a choiceset, and upon seeing a choiceSet, we call a different function to progress.
+                    return potentialPathAbstract;
+                }
+                
+                DialogueNode potentialPath = (DialogueNode)potentialPathAbstract;
                 if (potentialPath.Rules.Count == 0) return potentialPath;
 
+
+                
                 switch (potentialPath.CheckType)
                 {
                     case TextSystemEnums.RuleCheckType.any:
@@ -213,28 +153,6 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
             return null;
             
         }
-
-        /// <summary>
-        /// Get the next line in the dialogueNode OR jump to the next dialogue node based on paths.
-        /// </summary>
-        public void Next()
-        {
-            // TODO -> rehandle path checking based on facts.
-            dialogueElementsIdx++;
-
-        }
-
-        public void ResetDNodeIdx()
-        {
-            this.dialogueElementsIdx = 0;
-        }
-
-        public void NextChoice(int choiceIdx)
-        {
-
-        }
-        
-
 
     }
 }

@@ -2,27 +2,37 @@
 <dset id="1" code="Human Readable name" pull="sequential" textSpeed="1" >
   <choice>
     <option displayCheckType="any" chooseCheckType="any">
-      <chooseCheck fact="FACT_CODE" op="gt" val="17"/>
-      <text>option display text1</text>
-      <path>
+      <choiceCheck fact="FACT_CODE" op="gt" val="17"/>
+      <text>Should not be choosable based on facts.</text>
         <line textSpeed="2" speakerId="ZUES">
           <text>text1 chosen.</text>
         </line>
         <line textSpeed="2" speakerId="ZUES">
           <text>new line...</text >
         </line>
-      </path>
     </option>
 
     <option checkType="all" chooseCheckType="any">
-      <chooseCheck fact="FACT_CODE2" op="eq" val="1"/>
+      <choiceCheck fact="FACT_CODE2" op="eq" val="1"/>
       <displayCheck fact="FACT_CODE3" op="lte" val="1" />
-      <text>option 2</text>
-      <path>
+      <text>displayed and choosable</text>
         <line textSpeed="2" speakerId="ZUES">
           <text textSpeed="2" speakerId="ZUES">option2 chosen.</text>
         </line>
-      </path>
+        <line textSpeed="1" speakerId="Whoever">
+          <text>testing pathing within a choice selection</text>
+        </line>
+        <branch>
+          <path checkType="any">
+            <check fact="fact_000" op="eq" val="1"/>
+            <line>This branch should show.</line>
+          </path>
+          <path checkType="any">
+            <check fact="fact_000" op="eq" val="120"/>
+            <line>This branch should not show.</line>
+          </path>
+        </branch>
+      
     </option>
   </choice>
   <line textSpeed="2" speakerId="ZUES">

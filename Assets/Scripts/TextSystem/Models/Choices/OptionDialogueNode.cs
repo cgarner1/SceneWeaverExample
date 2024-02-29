@@ -10,10 +10,11 @@ using System.Xml;
 using Assets.Scripts.Facts.Models;
 using Assets.Scripts.TextSystem.Models.Dialogue;
 using Assets.Scripts.TextSystem.SceneWeaver;
+using Assets.Scripts.Facts.Utils;
 
 namespace Assets.Scripts.TextSystem.Choices
 {
-    public class OptionDialogueNode : DialogueNode
+    public class OptionDialogueNode : DialogueNodeAbstract
     {
         
         public TextSystemEnums.RuleCheckType DisplayCheckType { get; set; } // rules determining if choice is rendered
@@ -27,14 +28,14 @@ namespace Assets.Scripts.TextSystem.Choices
         public string displayText { get; set; }
         public Enums.TextSystemEnums.OptionNodeGotoType OptionGotoType;
 
-        public OptionDialogueNode()
+        public OptionDialogueNode() : base()
         {
             chooseRules = new List<FactBasedTextRule>();
             displayRules = new List<FactBasedTextRule>();
             FactUpdates = new List<FactUpdateModel>();
         }
 
-        public OptionDialogueNode(XmlNode optionXML)
+        public OptionDialogueNode(XmlNode optionXML) : base()
         {
             chooseRules = new List<FactBasedTextRule>();
             displayRules = new List<FactBasedTextRule>();
@@ -54,14 +55,61 @@ namespace Assets.Scripts.TextSystem.Choices
             // step3 : add fact updates
 
             // step4: parse paths. and create inner graph structure
-            foreach(XmlNode OptionNode in optionXML.ChildNodes)
+            Dictionary<string, List<XmlNode>> optionChildMap = new Dictionary<string, List<XmlNode>>();
+            HashSet<string> validOptionChildNodes = new HashSet<string>() { Constants.CHOOSE_CHECK_TAG, Constants.PATH_TAG, Constants.TEXT_TAG, Constants.DLINE_TAG, Constants.DISPLAY_CHECK_TAG, Constants.UPDATE_TAG };
+            foreach (string s in validOptionChildNodes)
             {
-                // we know how paths work at this point, the class we extend has functionality to handle this
+                optionChildMap[s] = new List<XmlNode>();
+            }
 
+            foreach (XmlNode optionChildXML in optionXML)
+            {
+                string nodeName = optionChildXML.Name.ToLower();
+                if (!validOptionChildNodes.Contains(nodeName))
+                {
+                    string exception = $"NODE NAME : {nodeName} attemped to add a node under an option tag that is not of the following accepted types:\n ";
+                    foreach (string s in validOptionChildNodes)
+                    {
+                        exception += s;
+                    }
+                    throw new Exception(exception);
+                }
+
+                optionChildMap[nodeName].Add(optionChildXML);
             }
 
 
+            // step 2:handle each as needed.
 
+            // all line tags are text that plays after choosing a choice.
+            foreach (XmlNode lineNode in optionChildMap[Constants.DLINE_TAG])
+            {
+
+                DialogueLine newLine = new DialogueLine(lineNode);
+                this.AddDialogueElement(newLine);
+            }
+
+            foreach (XmlNode updateNode in optionChildMap[Constants.UPDATE_TAG])
+            {
+                this.AddFactUpdate(FactUtils.CreateFactModelFromXML(updateNode));
+            }
+
+            // should only be one line always, but in the case someone messes up, just pick the last one.
+            // text with no line wrapping determines what text the choice has
+            foreach (XmlNode textNode in optionChildMap[Constants.TEXT_TAG])
+            {
+                this.displayText = textNode.InnerText;
+            }
+
+            // path nodes under this are handled identically to a branch, but require a wrapper.
+            // uuuuuh wait this seems like a bad idea. We should have a branch wrapping the path like everything else.
+            /*
+            XmlNode branchNodeWrapper = ScriptLoader.GetInstance().currentlyProcessingDocument.CreateElement(Constants.BRANCH_TAG);
+            foreach(XmlNode pathNode in optionChildMap[Constants.PATH_TAG])
+            {
+                branchNodeWrapper.AppendChild(pathNode);
+            }
+            */
         }
 
         private void AddAttributes(string displayCheckType, string chooseCheckType, string gotoType)
@@ -116,6 +164,20 @@ namespace Assets.Scripts.TextSystem.Choices
         public void SetDisplayText(string text)
         {
             this.displayText = text;
+        }
+
+        public override void AddRule(XmlNode ruleNode)
+        {
+            // we assume ruleNode type passed in is choiceCheck or displayCheck
+            if(ruleNode.Name == Constants.CHOOSE_CHECK_TAG)
+            {
+                chooseRules.Add(new FactBasedTextRule(ruleNode.Attributes));
+            } else if(ruleNode.Name == Constants.DISPLAY_CHECK_TAG)
+            {
+                displayRules.Add(new FactBasedTextRule(ruleNode.Attributes));
+            }
+
+           
         }
 
         public void AddDisplayRule(FactBasedTextRule displayRule)

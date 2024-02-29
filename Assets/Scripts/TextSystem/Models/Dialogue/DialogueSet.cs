@@ -30,14 +30,14 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
 
         
         private int currentDLineIdx;
-        List<DialogueNode> dNodeList;
+        List<DialogueNodeAbstract> dNodeList;
         /// <summary>
         /// Dialogue sets carry a list of nodes wthat are iterated over. Any branching dialogue is driven by moving in a linear fashion to each node.
         /// Internally, each DNode handles the complications of handling it's own dialogue tree. This is just a container for them.
         /// </summary>
         public DialogueSet()
         {
-            dNodeList = new List<DialogueNode>();
+            dNodeList = new List<DialogueNodeAbstract>();
             dNodeList.Add(new DialogueNode()); // we start out always with an empty one for ease of parsing
             currentDLineIdx = 0;
         }
@@ -80,13 +80,13 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
             
             foreach (XmlNode dSetChildXML in dSetNode.ChildNodes)
             {
-                switch (dSetChildXML.Name.ToLower()){
+                switch (dSetChildXML.Name.ToLower()) {
                     // branches denote that the dailogue presented to the user will branch based on their game state.
                     case Constants.BRANCH_TAG:
                         // when we branch, we want to create a new node all by itself that handles the branching.
                         // this node will start empty so we auto skip to next node when reading the data struicture
                         // on completion of this path, we then move to ANOTHER new node with lines and choices.
-                        DialogueNode isolatedPathNode = new DialogueNode() { SkipToNextPathNode = true };
+                        DialogueNode isolatedPathNode = new DialogueNode() { SkipToNextPathNode = true }; // er... WHY do I do this? why not just have the regular node?
                         HandleBranchNodeRecursive(isolatedPathNode, dSetChildXML);
                         dNodeList.Add(isolatedPathNode);
                         dNodeList.Add(new DialogueNode()); // next lines get attached here
@@ -98,9 +98,10 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                         break;
 
                     case Constants.CHOICE_TAG:
-                        
-                        ChoiceSet newChoiceSet = CreateChoiceSet(dSetChildXML);
-                        dNodeList[dNodeList.Count - 1].AddDialogueElement(newChoiceSet);
+                        ChoiceSet isolatedChoiceNode = new ChoiceSet() { SkipToNextPathNode = true }; // er... WHY do I do this? why not just have the regular node?
+                        HandleBranchNodeRecursive(isolatedChoiceNode, dSetChildXML);
+                        dNodeList.Add(isolatedChoiceNode);
+                        dNodeList.Add(new DialogueNode());
                         break;
                 }
 
@@ -118,57 +119,40 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
         /// takes a parent node and adds paths to it
         /// </summary>
         /// <param name="parent">the parent to attach the paths to. This function also populates the parents</param>
-        /// <param name="parentXML">a BRANCH node</param>
+        /// <param name="parentXML">a BRANCH node,OptionNode, choice node.</param>
         /// <returns></returns>
-        public DialogueNode HandleBranchNodeRecursive(DialogueNode parent, XmlNode parentXML)
+        public DialogueNodeAbstract HandleBranchNodeRecursive(DialogueNodeAbstract parent, XmlNode parentXML)
         {
-            foreach (XmlNode pathXML in parentXML.ChildNodes)
+            // branch signifiers are paths or options
+            foreach (XmlNode branchingOptionXML in parentXML.ChildNodes)
             {
-                DialogueNode newPathNode = new DialogueNode();
-                
-                // set attributes
-                string checkType = pathXML.Attributes[Constants.PATH_CHECK_TYPE].Value;
-
-                switch (checkType.ToLower())
-                {
-                    case "any":
-                        newPathNode.CheckType = Enums.TextSystemEnums.RuleCheckType.any;
-                        break;
-                    case "all":
-                        newPathNode.CheckType = Enums.TextSystemEnums.RuleCheckType.all;
-                        break;
-                    default:
-                        newPathNode.CheckType = Enums.TextSystemEnums.RuleCheckType.noCheck;
-                        break;
-                }
-
-                parent.nextPathNodes.Add(newPathNode);
-
-                if(parentXML.Name == Constants.CHOICE_TAG)
-                {
-                    throw new Exception("branch called for choice tag");
-                }
+                // this is the core logic that handles the actual path/option node creation. If a path or option has another branch or choice in it, we continue to recruse.
+                // if not, the recursive tree stops here.
+                // there will never be an option and under it option, or path and under it another path.
+                DialogueNodeAbstract newNode = DialogueNodeFactory.CreateDNode(branchingOptionXML);
+                parent.nextPathNodes.Add(newNode);
 
                 // at this point, we parse the current path node, adding checks and lines. If there is another path, we recurse
-                foreach(XmlNode pathChildXML in pathXML.ChildNodes)
+                foreach(XmlNode branchingOptionChild in branchingOptionXML.ChildNodes)
                 {
                     // path children can be lines, choices, branch
                     // TODO not logic for path checks
-                    switch (pathChildXML.Name.ToLower())                                          
+                    switch (branchingOptionChild.Name.ToLower())                                          
                     {
                         case Constants.BRANCH_TAG:
-                            HandleBranchNodeRecursive(newPathNode, pathChildXML);
+                            HandleBranchNodeRecursive(newNode, branchingOptionChild);
                             break;
                         case Constants.DLINE_TAG:
-                            DialogueLine newLine = new DialogueLine(pathChildXML);
-                            newPathNode.AddDialogueElement(newLine);
+                            DialogueLine newLine = new DialogueLine(branchingOptionChild);
+                            newNode.AddDialogueElement(newLine);
                             break;
                         case Constants.CHOICE_TAG:
-                            ChoiceSet newChoiceSet = CreateChoiceSet(pathChildXML);
-                            newPathNode.AddDialogueElement(newChoiceSet);
-                            break;
+                            // step 1: always create a choiceSet as a NEW node!!! 
+                            // we then know all nodes under it MUST be options.
+                            break; 
+
                         case Constants.CHECK_TAG:
-                            newPathNode.AddRule(pathChildXML);
+                            newNode.AddRule(branchingOptionChild);
                             break;
                     }
                 }
@@ -177,88 +161,6 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
             }
 
             return parent;
-        }
-
-        
-        // TODO -> move this code to choice set init?
-        /// <summary>
-        /// We willl see an indicator of a choice in our XML. Each choice has options on how to proceed.
-        /// </summary>
-        /// <param name="parent"></param>
-        /// <param name="choiceSetXML">XML of a choice node</param>
-        /// <returns></returns>
-        public ChoiceSet CreateChoiceSet(XmlNode choiceSetXML)
-        {
-            ChoiceSet choiceSet = new ChoiceSet();
-            if (choiceSetXML.Name != Constants.CHOICE_TAG) throw new Exception($"Parsing error, expected a choice tag. got {choiceSetXML.Name}");
-            
-            foreach(XmlNode optionXML in choiceSetXML.ChildNodes)
-            {
-                // these will always be a <option> (options cannot be nested). However, we can find paths within these.
-                OptionDialogueNode newOption = new OptionDialogueNode(optionXML);
-
-                // step 1: seperate the lines, text, choice/displayChecks and paths. Store them for their own processing
-                Dictionary<string, List<XmlNode>> optionChildMap = new Dictionary<string, List<XmlNode>>();
-                HashSet<string> validOptionChildNodes = new HashSet<string>() { Constants.CHOOSE_CHECK_TAG, Constants.PATH_TAG, Constants.TEXT_TAG, Constants.DLINE_TAG, Constants.DISPLAY_CHECK_TAG, Constants.UPDATE_TAG};
-                foreach(string s in validOptionChildNodes)
-                {
-                    optionChildMap[s] = new List<XmlNode>();
-                }
-
-                foreach (XmlNode optionChildXML in optionXML)
-                {
-                    string nodeName = optionChildXML.Name.ToLower();
-                    if (!validOptionChildNodes.Contains(nodeName))
-                    {
-                        string exception = $"NODE NAME : {nodeName} attemped to add a node under an option tag that is not of the following accepted types:\n ";
-                        foreach(string s in validOptionChildNodes)
-                        {
-                            exception += s;
-                        }
-                        throw new Exception(exception);
-                    }
-
-                    optionChildMap[nodeName].Add(optionChildXML);
-                }
-
-
-                // step 2:handle each as needed.
-
-                // all line tags are text that plays after choosing a choice.
-                foreach(XmlNode lineNode in optionChildMap[Constants.DLINE_TAG])
-                {
-                    
-                    DialogueLine newLine = new DialogueLine(lineNode);
-                    newOption.AddDialogueElement(newLine);
-                }
-
-                foreach(XmlNode updateNode in optionChildMap[Constants.UPDATE_TAG])
-                {
-                    newOption.AddFactUpdate(FactUtils.CreateFactModelFromXML(updateNode));
-                }
-
-                // should only be one line always, but in the case someone messes up, just pick the last one.
-                foreach(XmlNode textNode in optionChildMap[Constants.TEXT_TAG])
-                {
-                    newOption.displayText = textNode.InnerText;
-                }
-
-                // path nodes under this are handled identically to a branch, but require a wrapper.
-                XmlNode branchNodeWrapper = ScriptLoader.GetInstance().currentlyProcessingDocument.CreateElement(Constants.BRANCH_TAG);
-                foreach(XmlNode pathNode in optionChildMap[Constants.PATH_TAG])
-                {
-                    branchNodeWrapper.AppendChild(pathNode);
-                }
-
-                HandleBranchNodeRecursive(newOption, branchNodeWrapper); // todo think this works..?
-
-                // todo -> process checks.
-
-
-                choiceSet.AddOption(newOption);
-            }
-
-            return choiceSet;
         }
 
         /// <summary>
@@ -317,7 +219,7 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                 
                 dNodeList[currentDLineIdx].ResetDNodeIdx(); // reset the idx of previous dNode so that if we see it again we start at the first element
                 currentDLineIdx++;
-                var nextDNode = dNodeList[currentDLineIdx].GetNextNodePathBasedOnFacts();
+                var nextDNode = dNodeList[currentDLineIdx].GetNextNodePath();
                 
                 if(nextDNode is null)
                 {
@@ -333,7 +235,7 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                 else if (nextDNode.SkipToNextPathNode && nextDNode.HasNextDialogueNode())
                 {
                     // we have moved to a node that holds a path, choose where to go.
-                    nextDNode = nextDNode.GetNextNodePathBasedOnFacts();
+                    nextDNode = nextDNode.GetNextNodePath();
                 }
                 dNodeList[currentDLineIdx] = nextDNode;
             }
@@ -346,7 +248,7 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                 currentDLineIdx++;
                 if (dNodeList[currentDLineIdx].SkipToNextPathNode)
                 {
-                    var nextDNode = dNodeList[currentDLineIdx].GetNextNodePathBasedOnFacts(); // seems to always return null?
+                    var nextDNode = dNodeList[currentDLineIdx].GetNextNodePath(); // seems to always return null?
                     // there is still the case that we choose nothing on this path.
                     if (nextDNode is null)
                     {

@@ -50,31 +50,36 @@ public class UIController : MonoBehaviour
 
     public void InsertNextDialogueElement(int dSetId)
     {
-        if (typeWriter.isWriting)
+        if (typeWriter.isWriting || typeWriter.IsAwaitingChoice)
         {
-            typeWriter.FinishLine();
+            // typeWriter.FinishLine(); -> only finish line based on a setting in game. Some game designs will not allow dialogue to finish, others will.
             return;
         }
 
         IDialogueModel line = SceneWeaver.GetInstance().GetNextDialogueElement(dSetId); // we don't want to call this when we see a choice!!!
         if (line is null) return;
 
+        // todo -> this is DEFINTELY broken lol
         if (line.IsFinalNodeInDSet)
         {
             Debug.LogWarning("FINAL NODE IN DSET DELIVERED. TODO:HANDLE THIS");
         }
+
         manager.InsertVisualElementIntoDialogueSecition(line.Renderer.GetVisualElement()); // must insert the new line first
         if (line is DialogueLine)
         {
-            
-            typeWriter.SetDLine((DialogueLine)line);
+            typeWriter.BeginTypeWriting((DialogueLine)line);
+        } else if(line is ChoiceSet)
+        {
+            // make it so we can ONLY progress on click.
+            typeWriter.IsAwaitingChoice = true;
         }
     }
 
     // TODO -> not properly set up to fire.
     public void OnDialogueSetExhausted(object source, System.EventArgs e)
     {
-        typeWriter.SetDLine(new DialogueLine("DSET IS EMPTY. RETURN TO GAMEPLAY")); // todo -> make this debug only
+        typeWriter.BeginTypeWriting(new DialogueLine("DSET IS EMPTY. RETURN TO GAMEPLAY")); // todo -> make this debug only
     }
 
     // TODO

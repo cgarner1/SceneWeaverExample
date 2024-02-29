@@ -11,15 +11,15 @@
 
   <!-- id for dSets should be assigned by another tool. -->
   <dialogue>
-    <!-- DSet is a dialougue set. Group of dialouge related in some fashion -> a set of dialouge to play after a stat check, plays under a specific circumstance, etc -->
+    <!-- dset is a dialougue set. Group of dialouge related in some fashion -> a set of dialouge to play after a stat check, plays under a specific circumstance, etc -->
     <!-- options for pulling the next tag: [sequential, random, wRandom] wRandom requires weights to be assigned to each line -->
-    <dSet id="1" code="Human Readable name" pull="sequential" textSpeed="1" >
+    <dset id="1" code="Human Readable name" pull="sequential" textSpeed="1">
 
       <!-- text speed not required here, but will override parent -->
       <!-- playSound, playMusic, playAnim, prePuase optional -->
       <!-- if "hasBeenPlayed is not specified, it's expected false. This will oly be updated via code"-->
       <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
-        <text prePause="0.3" textSound="overideSpeakerTextSoundHere">
+        <text textSpeed="1" prePause="0.3" textSound="overideSpeakerTextSoundHere">
           Lorem ipsum dolor sit <i>amet</i>, consectetur <color hex="#AE1234">adipiscing</color> elit,
         </text>
         <text prePause="0" textSpeed="1">sed do eiusmod tempor incididunt ut labore...</text>
@@ -38,11 +38,11 @@
         <text>Sed ut perspiciatis unde omnis iste natus error sit voluptatem... </text>
         <text>accusantium doloremque laudantium, totam rem aperiam,</text>
       </line>
-    </dSet>
+    </dset>
 
 
     <!-- dSets can also allow branching based on facts about the world. No branch means we expect the main path -->
-    <dSet id="2" code="DEFINED_CODE_SYSTEM_TO_AVOID_CONFLICTS" pull="sequential">
+    <dset id="2" code="DEFINED_CODE_SYSTEM_TO_AVOID_CONFLICTS" pull="sequential">
       <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1">
         <text>sed do eiusmod tempor incididunt ut labore...</text>
       </line>
@@ -50,7 +50,7 @@
       <branch>
         <path checkType="any">
             <check fact="FACT_CODE" op="gt" val="4"/>
-            <check factId="1" op="gt" val="4"/>
+            <check fact="1" op="gt" val="4"/>
             <check fact="FACT_CODE2" op="eq" val="1"/>
             <check fact="FACT_CODE3" op="lte" val="1"/>
             <line speakerId="ZUES">
@@ -68,7 +68,7 @@
         <branch>
           <path checkType="any">
             <check fact="FACT_CODE" op="gt" val="4"/>
-            <check factId="1" op="gt" val="4"/>
+            <check fact="1" op="gt" val="4"/>
             <check fact="FACT_CODE2" op="eq" val="1"/>
             <check fact="FACT_CODE3" op="lte" val="1"/>
             <line>
@@ -91,7 +91,7 @@
       <branch>
         <path checkType="any">
           <check fact="FACT_CODE" op="gt" val="4"/>
-          <check factId="1" op="gt" val="4"/>
+          <check fact="1" op="gt" val="4"/>
           <check fact="FACT_CODE2" op="eq" val="1"/>
           <check fact="FACT_CODE3" op="lte" val="1"/>
           <line speakerId="DUES">
@@ -105,7 +105,7 @@
           <branch>
             <path checkType="any">
               <check fact="FACT_CODE" op="gt" val="4"/>
-              <check factId="1" op="gt" val="4"/>
+              <check fact="1" op="gt" val="4"/>
               <check fact="FACT_CODE2" op="eq" val="1"/>
               <check fact="FACT_CODE3" op="lte" val="1"/>
               <line speakerId="NABLE">
@@ -117,25 +117,25 @@
           
         </path>
       </branch>
-    </dSet>
+    </dset>
   
     <!-- dSets can make references to other dSets in OTHER files by their id or name, allowing intercutting, GIVEN THEY ARE REFERENCED IN INCLUDE OR INCLUDE TAG -->
-    <dSet id="5" code="DEFINED_CODE_SYSTEM_TO_AVOID_CONFLICTS" pull="sequential">
+    <dset id="5" code="DEFINED_CODE_SYSTEM_TO_AVOID_CONFLICTS" pull="sequential">
       <line>
         <text>Nam libero tempore, cum soluta nobis est eligendi</text>
-        <innerRef id="1"/> <!-- a reference to a dSet WITHIN this document -->
+        <innerRef id="1"/> <!-- a reference to a dset WITHIN this document -->
         <text>Giga Benis,</text>
 
-        <externalRef code="9"/><!-- a ref to an external dSet. It is CRITICAL that ids and codes are unique!!!-->
+        <externalRef code="9"/><!-- a ref to an external dset. It is CRITICAL that ids and codes are unique!!!-->
         <externalRef path="ScriptExample2.xml"/>
       </line>
-    </dSet>
+    </dset>
     
     <!-- finally, dSets also need to allow display a set of choices that, usually, update facts. These facts have scope, scene, temp, global-->
     <!-- options must be able to be hidden based on facts-->
     <!-- all or any choice checks must pass in order to SELECT a choice -->
     <!-- all or any display checks must pass to be able to SEE a choice at all -->
-    <dSet id="5" code="DEFINED_CODE_SYSTEM_TO_AVOID_CONFLICTS" pull="sequential">
+    <dset id="5" code="DEFINED_CODE_SYSTEM_TO_AVOID_CONFLICTS" pull="sequential">
       <choice>
         <option displayCheckType="any" choiceCheckType="any">
           <choiceCheck fact="FACT_CODE" op="gt" val="17"/>
@@ -147,7 +147,7 @@
           <choiceCheck fact="FACT_CODE2" op="eq" val="1"/>
           <displayCheck fact="FACT_CODE3" op="lte" val="1" />
           <text>option display text2</text>
-          <update factId="3" set="++"/>
+          <update fact="3" set="++"/>
         </option>
       </choice>
 
@@ -178,19 +178,21 @@
       <line>
         <text>back to main branch line</text>
       </line>
-    </dSet>
+    </dset>
 
     
       
     <!-- dSets can update a specfic fact about the world. -->
-    <dSet id="5" code="DEFINED_CODE_SYSTEM_TO_AVOID_CONFLICTS" pull="sequential">
+    <!-- update by fact name is not implmented yet. -->
+    <dset id="5" code="DEFINED_CODE_SYSTEM_TO_AVOID_CONFLICTS" pull="sequential">
       <line>
         <text>Nam libero tempore, cum soluta nobis est eligendi</text>
-        <update factId="3" set="++"/>
-        <update factName="YouCanAlsoUseAFactCode" set="--"/>
-        <update factId="5" set="7"/>
+        <update fact="3" set="++"/>
+        <!--  <update factName="YouCanAlsoUseAFactCode" set="++"/> -->
+       
+        <update fact="5" set="7"/>
       </line>
-    </dSet>
+    </dset>
   </dialogue>
 
 

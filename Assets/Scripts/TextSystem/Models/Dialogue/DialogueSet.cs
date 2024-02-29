@@ -75,7 +75,10 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
         {
             this.Id = Int32.Parse(dSetNode.Attributes["id"].Value);
             this.Code = dSetNode.Attributes["code"].Value;
-            this.TextSpeed = float.Parse(dSetNode.Attributes["textSpeed"]?.Value); // textSpeed optional
+            if(float.TryParse(dSetNode.Attributes["textSpeed"]?.Value, out float textSpeed)){
+                this.TextSpeed = textSpeed;
+            }
+
             string pullType = dSetNode.Attributes["pull"]?.Value;
             
             foreach (XmlNode dSetChildXML in dSetNode.ChildNodes)

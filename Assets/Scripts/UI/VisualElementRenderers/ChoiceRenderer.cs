@@ -31,7 +31,10 @@ namespace Assets.Scripts.UI.VisualElements
 
         public ChoiceRenderer(ChoiceSet choiceSet)
         {
-            this.options = choiceSet.choiceOptions;
+            // uh obviously this will throw if choiceSet parser somehow gets a choice set with option children.... Which... should be impossible
+            // if this DOES trigger, the problem IS NOT HERE and is in our parsing logic.
+            options = choiceSet.nextPathNodes.Cast<OptionDialogueNode>().ToList();
+            
         }
 
         // NOTE -. choices should be built right before they render. Facts are checked when the visual element is rendered!!

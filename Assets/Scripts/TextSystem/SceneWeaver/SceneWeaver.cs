@@ -32,8 +32,6 @@ namespace Assets.Scripts.TextSystem.SceneWeaver {
         private int lineIdx = 0;
         private Dictionary<int, DialogueSet> dSetMap;
 
-        
-
         private static SceneWeaver instance;
 
         public static SceneWeaver GetInstance()
@@ -72,9 +70,9 @@ namespace Assets.Scripts.TextSystem.SceneWeaver {
             try
             {
                 
-                IDialogueModel dailogueElement = dSetMap[id].GetCurrentDialogueModel(); // automatically skips to next node, updates facts
-
-                return dailogueElement;
+                IDialogueModel dialogueElement = dSetMap[id].GetCurrentDialogueModel(); // automatically skips to next node, updates facts
+                
+                return dialogueElement;
             } catch (DialogueExaustedException e)
             {
                 // Todo -> validate this is caught.
@@ -159,7 +157,7 @@ namespace Assets.Scripts.TextSystem.SceneWeaver {
         /// TODO currently overwrites!!! We need to just add it into the existing map
         /// </summary>
         /// <param name="relativePath"></param>
-        public void LoadScene(string relativePath)
+        public void LoadDialogueSet(string relativePath)
         {
             // objetcs in the scene need to have an asscoiated id to load when interacted with. These ids must be written in the DSet xml abnd are the keys in this map
             Dictionary<int, DialogueSet> dSetMap = ScriptLoader.GetInstance().LoadSceneByPath(relativePath);

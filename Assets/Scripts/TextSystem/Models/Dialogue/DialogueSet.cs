@@ -150,8 +150,8 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                             newNode.AddDialogueElement(newLine);
                             break;
                         case Constants.CHOICE_TAG:
-                            // step 1: always create a choiceSet as a NEW node!!! 
-                            // we then know all nodes under it MUST be options.
+                            // we KNOW that newNode must be a choice in this case. This is the only time we see an option. tag.
+                            // HandleBranchNodeRecursive(newNode, branchingOptionChild);
                             break; 
 
                         case Constants.CHECK_TAG:
@@ -161,6 +161,13 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                 }
 
                 
+            }
+
+            if (parent is ChoiceSet)
+            {
+                var parentChoiceRef = (ChoiceSet)parent;
+                parentChoiceRef.BindRenderer();
+                // done bc, unfrotunely, choiceSets current carry their own renderer, instead of options... It's stupid I know. TODO fix this
             }
 
             return parent;
@@ -238,7 +245,7 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                     }
                     return;
                 }
-                if (nextDNode.SkipToNextPathNode)
+                if (nextDNode.SkipToNextPathNode && !(dNodeList[currentDNodeIdx] is ChoiceSet))
                 {
                     Next();
                     return;
@@ -253,7 +260,8 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                 currentDNodeIdx++;
 
                 // handle the case we see a skip node.
-                if (dNodeList[currentDNodeIdx].SkipToNextPathNode)
+                // er... need to fix this bc this is messy,, but choiceSets shouldn't be skipped...
+                if (dNodeList[currentDNodeIdx].SkipToNextPathNode && !(dNodeList[currentDNodeIdx] is ChoiceSet))
                 {
                     // in the case we see a skip node, just re-run Next.
                     Next();

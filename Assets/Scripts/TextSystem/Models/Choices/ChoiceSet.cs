@@ -23,7 +23,8 @@ namespace Assets.Scripts.TextSystem.Choices
         public ChoiceSet() : base()
         {
             //this.choiceOptions = new List<OptionDialogueNode>();
-            Renderer = new ChoiceRenderer(this);
+            // Renderer = new ChoiceRenderer(this);
+            
         }
 
         public override IDialogueModel TryGetCurrentDialogueElement()

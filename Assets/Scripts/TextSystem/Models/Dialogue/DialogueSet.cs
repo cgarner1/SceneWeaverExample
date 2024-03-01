@@ -29,7 +29,7 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
         public float TextSpeed { get; private set; } = 1f;
 
         
-        private int currentDLineIdx;
+        private int currentDNodeIdx;
         List<DialogueNodeAbstract> dNodeList;
         /// <summary>
         /// Dialogue sets carry a list of nodes wthat are iterated over. Any branching dialogue is driven by moving in a linear fashion to each node.
@@ -39,12 +39,12 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
         {
             dNodeList = new List<DialogueNodeAbstract>();
             dNodeList.Add(new DialogueNode()); // we start out always with an empty one for ease of parsing
-            currentDLineIdx = 0;
+            currentDNodeIdx = 0;
         }
 
         public DialogueSet(XmlNode DSetNode)
         {
-            currentDLineIdx = 0;
+            currentDNodeIdx = 0;
             dNodeList.Add(new DialogueNode());
             this.Id = Int32.Parse(DSetNode.Attributes["id"].Value);
             this.Code = DSetNode.Attributes["code"].Value;
@@ -176,7 +176,7 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
         public IDialogueModel GetCurrentDialogueModel(bool progressIdx = true, bool updateFactsOnGet = true)
         {
 
-            IDialogueModel nextElement = this.dNodeList[currentDLineIdx].TryGetCurrentDialogueElement(); // null if our DSet was exhausted on last pull.
+            IDialogueModel nextElement = this.dNodeList[currentDNodeIdx].TryGetCurrentDialogueElement(); // null if our DSet was exhausted on last pull.
             
             if (updateFactsOnGet && nextElement != null)
             {
@@ -211,62 +211,56 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
         /// </summary>
         public void Next()
         {
-            if (dNodeList[currentDLineIdx].HasAvailableElements())
+            if (dNodeList[currentDNodeIdx].HasAvailableElements())
             {
-                // this dialogue node has not been exuasted.
-                dNodeList[currentDLineIdx].Next();
+                // this dialogue node has dialogue lines left to play.
+                dNodeList[currentDNodeIdx].Next();
+                return;
+            }
 
-            } else if (dNodeList[currentDLineIdx].HasNextDialogueNode())
+            if (dNodeList[currentDNodeIdx].HasNextDialogueNode())
             {
-                // the dialoguenode we are looking at has an avaialble path!
+                // node has no dialougue left, but we can get more from choosing a neighbor
+                dNodeList[currentDNodeIdx].ResetDElementsIdx();
                 
-                dNodeList[currentDLineIdx].ResetDNodeIdx(); // reset the idx of previous dNode so that if we see it again we start at the first element
-                currentDLineIdx++;
-                var nextDNode = dNodeList[currentDLineIdx].GetNextNodePath();
+                var nextDNode = dNodeList[currentDNodeIdx].GetNextNodePath(); // choose neighbor based on facts.
+
                 
-                if(nextDNode is null)
+                
+                // will be null when we see there is a new path node, BUT nothing on that path can be chosen. We just want to continue past it.
+                if (nextDNode is null)
                 {
-                    // in this case, there are no more lines in this dialogue node, and we can't pick any paths within it.
-                    currentDLineIdx++;
-                    if (dNodeList[currentDLineIdx] is null)
+                    // in this case, SOMEHOW we've gotten back a null where no paths could be chosen. Likely dead code. Replace with recursive next call if skip node is called?
+                    currentDNodeIdx++;
+                    if (dNodeList[currentDNodeIdx] is null)
                     {
                         throw new DialogueExaustedException("");
                     }
                     return;
+                }
+                if (nextDNode.SkipToNextPathNode)
+                {
+                    Next();
+                    return;
+                }
 
-                }
-                else if (nextDNode.SkipToNextPathNode && nextDNode.HasNextDialogueNode())
-                {
-                    // we have moved to a node that holds a path, choose where to go.
-                    nextDNode = nextDNode.GetNextNodePath();
-                }
-                dNodeList[currentDLineIdx] = nextDNode;
-            }
-            else if (currentDLineIdx + 1 < this.dNodeList.Count)
+                dNodeList[currentDNodeIdx] = nextDNode;
+
+            } else if (currentDNodeIdx + 1 < this.dNodeList.Count)
             {
-                // TECH DEBT!!!
-                // exuasted dialoguenode, no paths to take. Move to the next avaialble DNode held by this set.
-                // curently this is expected to ONLY occur on paths. This will likely change needing some rethinking.
-                dNodeList[currentDLineIdx].ResetDNodeIdx(); // reset the idx of previous dNode so that if we see it again we start at the first element
-                currentDLineIdx++;
-                if (dNodeList[currentDLineIdx].SkipToNextPathNode)
+                // no nieghbors, no dialogue lines left -- only option is to move forward in dialogue node list.
+                dNodeList[currentDNodeIdx].ResetDElementsIdx();
+                currentDNodeIdx++;
+
+                // handle the case we see a skip node.
+                if (dNodeList[currentDNodeIdx].SkipToNextPathNode)
                 {
-                    var nextDNode = dNodeList[currentDLineIdx].GetNextNodePath(); // seems to always return null?
-                    // there is still the case that we choose nothing on this path.
-                    if (nextDNode is null)
-                    {
-                        // there shouldnt ever be a case of 2 paths back to back. They should be a single path in the xml and then a choice or line.
-                        // if this changes, we need to repeatedly do this check until skip != false.
-                        // or recursive, and split all of the logic in each conditional into it's own seperate func for reuse.
-                        // for now? fuck it. Make a mess.
-                        currentDLineIdx++;
-                    }
-                    dNodeList[currentDLineIdx] = nextDNode;
+                    // in the case we see a skip node, just re-run Next.
+                    Next();
+                    return;
                 }
-            }
-            else
+            } else
             {
-                //  er... figure out what this means LOL
                 Debug.Log("exhausted.");
                 throw new DialogueExaustedException("have not implemented code to handle the exaustion of a dialogue set. TODO: send an event to notify that this dialogue is over.");
             }
@@ -277,7 +271,7 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
         /*
         public bool HasNextLine()
         {
-            return (currentDLineIdx < Lines.Count);
+            return (currentDNodeIdx < Lines.Count);
         }
         */
 

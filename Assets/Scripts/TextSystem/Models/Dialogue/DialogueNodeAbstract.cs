@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using UnityEngine;
 
 namespace Assets.Scripts.TextSystem.Models.Dialogue
 {
@@ -57,6 +58,7 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
             }
             catch (Exception e)
             {
+                Debug.Log(e); // normally should occur when exausting a dset
                 return null;
             }
 
@@ -86,7 +88,7 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
 
         }
 
-        public void ResetDNodeIdx()
+        public void ResetDElementsIdx()
         {
             this.dialogueElementsIdx = 0;
         }

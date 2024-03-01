@@ -46,11 +46,11 @@
       </choice>
       
       <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
-        <text prePause="0" textSpeed="1">This is a line</text>
+        <text prePause="0" textSpeed="1">This is a line2</text>
       </line>
       
       <line textSpeed="2" speakerId="ZUES" playAnim="ZUES_SURP.anim" prePause ="0.1" hasBeenPlayed="true">
-        <text prePause="0" textSpeed="1">This is a line 2</text>
+        <text prePause="0" textSpeed="1">This is a line 3</text>
       </line>
 
     </dset>

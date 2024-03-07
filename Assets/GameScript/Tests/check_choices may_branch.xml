@@ -34,11 +34,15 @@
       <branch>
         <path checkType="any">
           <check fact="fact_000" op="eq" val="0"/>
-          <line>This branch should show.</line>
+          <line textSpeed="4" speakerId="Whoever2">
+            <text>this branch should show</text>
+          </line>
         </path>
         <path checkType="any">
           <check fact="fact_000" op="eq" val="120"/>
-          <line>This branch should not show.</line>
+          <line textSpeed="4" speakerId="Whoever2">
+            <text>this branch should not show</text>
+          </line>
         </path>
       </branch>
       

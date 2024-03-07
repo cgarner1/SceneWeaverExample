@@ -31,6 +31,7 @@ namespace Assets.Scripts.TextSystem.Choices
         {
             // uh this is jank, but our UI controller expects a choiceSet to be it's dialogue element. Needs a refactor (but later) :)
             // for later refactor, allow the ChoiceSet to contain to DialogueLine that has all of the rendering info in it.
+            
             return this;
 
         }

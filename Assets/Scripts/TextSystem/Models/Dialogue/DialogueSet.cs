@@ -229,8 +229,6 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                 dNodeList[currentDNodeIdx].ResetDElementsIdx();
                 
                 var nextDNode = dNodeList[currentDNodeIdx].GetNextNodePath(); // choose neighbor based on facts.
-
-                
                 
                 // will be null when we see there is a new path node, BUT nothing on that path can be chosen. We just want to continue past it.
                 if (nextDNode is null)
@@ -243,7 +241,9 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                     }
                     return;
                 }
-                if (nextDNode.SkipToNextPathNode && !(dNodeList[currentDNodeIdx] is ChoiceSet))
+
+                
+                if ((nextDNode.SkipToNextPathNode || nextDNode.NextDialogueElements.Count == 0) && !(dNodeList[currentDNodeIdx] is ChoiceSet) )
                 {
                     Next();
                     return;
@@ -259,7 +259,7 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
 
                 // handle the case we see a skip node.
                 // er... need to fix this bc this is messy,, but choiceSets shouldn't be skipped...
-                if (dNodeList[currentDNodeIdx].SkipToNextPathNode && !(dNodeList[currentDNodeIdx] is ChoiceSet))
+                if ((dNodeList[currentDNodeIdx].SkipToNextPathNode || dNodeList[currentDNodeIdx].NextDialogueElements.Count == 0) && !(dNodeList[currentDNodeIdx] is ChoiceSet))
                 {
                     // in the case we see a skip node, just re-run Next.
                     Next();

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Assets.Scripts.GameEvents;
 using Assets.Scripts.Sound;
 using Assets.Scripts.Sound.Implementation;
 using Assets.Scripts.TextSystem.Models.Dialogue;
@@ -20,6 +21,8 @@ namespace Assets.Scripts.TextSystem.SceneWeaver
     {
         [SerializeField]
         private AudioController audioManager;
+        [SerializeField] 
+        private EventsManager eventsManager;
 
         float shownCharsInTextBlock = 0;
         private int textBlockIdx = 0;
@@ -35,6 +38,7 @@ namespace Assets.Scripts.TextSystem.SceneWeaver
         private UIController uiController;
         private DialogueLine currentLine;
         private StringBuilder sb = new StringBuilder();
+
 
         /// <summary>
         /// Each time this runs, it adds a SINGLE character. It also handles things like playing audio, pre-pauses for specific characters, etc.
@@ -95,7 +99,15 @@ namespace Assets.Scripts.TextSystem.SceneWeaver
 
                 // prioritize textBlock attributes, if specified.
                 textSpeed = currentLine.textBlocks[textBlockIdx].TextSpeed.HasValue ? currentLine.textBlocks[textBlockIdx].TextSpeed.Value : currentLine.TextSpeed;
+                if(currentLine.textBlocks[textBlockIdx].Events.Count > 0)
+                {
+                    foreach (var eventName in currentLine.textBlocks[textBlockIdx].Events)
+                    {
+                        eventsManager.PlayEvent(eventName);
+                    }
 
+                    // play event through handler.
+                }
                 StartCoroutine(TypeWriterTextRoutine(textSpeed));
             } else
             {
@@ -113,6 +125,15 @@ namespace Assets.Scripts.TextSystem.SceneWeaver
             textSpeed = line.textBlocks[textBlockIdx].TextSpeed.HasValue ? line.textBlocks[textBlockIdx].TextSpeed.Value : line.TextSpeed;
             // todo -> update the speaker on UI.
 
+            // textBlocks have events that play at the beginni
+            if(line.textBlocks[textBlockIdx].Events.Count > 0)
+            {
+                foreach (var eventName in currentLine.textBlocks[textBlockIdx].Events)
+                {
+                    Debug.Log("trying to play event");
+                    eventsManager.PlayEvent(eventName);
+                }
+            }
             StartCoroutine(TypeWriterTextRoutine(line.TextSpeed));
         }
 

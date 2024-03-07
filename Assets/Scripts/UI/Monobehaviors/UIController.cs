@@ -43,11 +43,6 @@ public class UIController : MonoBehaviour
         }
     }
 
-    public void InsertVisualElementIntoDialogueSecition(VisualElement element)
-    {
-        manager.InsertVisualElementIntoDialogueSecition(element);
-    }
-
     public void InsertNextDialogueElement(int dSetId)
     {
         if (typeWriter.isWriting || typeWriter.IsAwaitingChoice)

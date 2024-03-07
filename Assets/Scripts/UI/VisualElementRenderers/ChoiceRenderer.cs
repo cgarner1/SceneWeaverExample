@@ -99,7 +99,8 @@ namespace Assets.Scripts.UI.VisualElements
 
         public VisualElement GetVisualElement()
         {
-            if (element is null) BuildVisualElement();
+            // we rebuild the visual element on get. This handles conditional rendering for displaying choices.
+            BuildVisualElement();
             return element;
         }
 

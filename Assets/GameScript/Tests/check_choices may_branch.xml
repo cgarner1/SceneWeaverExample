@@ -8,7 +8,7 @@
   </line>
   <choice>
     <option displayCheckType="any" chooseCheckType="any">
-      <choiceCheck fact="FACT_CODE" op="gt" val="17"/>
+      <displayCheck fact="fact_000" op="gt" val="17"/>
       <text>Should not be choosable based on facts.</text>
         <line textSpeed="4" speakerId="ZUES">
           <text>text1 chosen.</text>
@@ -19,8 +19,8 @@
     </option>
 
     <option checkType="all" chooseCheckType="any">
-      <choiceCheck fact="FACT_CODE2" op="eq" val="1"/>
-      <displayCheck fact="FACT_CODE3" op="lte" val="1" />
+      <choiceCheck fact="fact_001" op="eq" val="1"/>
+      <displayCheck fact="fact_000" op="lte" val="1" />
       <text>displayed and choosable</text>
       <line textSpeed="4" speakerId="ZUES">
         <text textSpeed="2" speakerId="ZUES">line 1: option2 chosen.</text>

@@ -28,6 +28,7 @@ namespace Assets.Scripts.TextSystem.Choices
         public List<FactBasedTextRule> displayRules { get; set; }
         public string displayText { get; set; }
         public Enums.TextSystemEnums.OptionNodeGotoType OptionGotoType;
+        public bool HasBeenClicked { get; set; } = true;
 
         public OptionDialogueNode() : base()
         {
@@ -213,8 +214,12 @@ namespace Assets.Scripts.TextSystem.Choices
 
         public void OnClick()
         {
-            UIController.Instance.InsertNextDialogueElementFromChoice(this, 1);
-            Debug.Log($"Chose option:{this.IdxInParentNode} -- {this.displayText}");
+            if (HasBeenClicked)
+            {
+                UIController.Instance.InsertNextDialogueElementFromChoice(this, 1);
+                this.HasBeenClicked = false;
+                Debug.Log($"Chose option:{this.IdxInParentNode} -- {this.displayText}");
+            }
         }
 
 

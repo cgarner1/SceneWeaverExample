@@ -15,6 +15,7 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
 {
     public abstract class DialogueNodeAbstract
     {
+        public int IdxInParentNode { get; set; }
         public TextSystemEnums.PullType PullType { get; set; }
         protected int dialogueElementsIdx;
         public List<IDialogueModel> NextDialogueElements { get; set; }
@@ -95,6 +96,11 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
 
         public abstract void AddRule(XmlNode ruleNode);
         
+        public DialogueNodeAbstract GetNextNodePathByIdx(int idx)
+        {
+            return this.nextPathNodes[idx];
+        }
+
         public virtual DialogueNodeAbstract GetNextNodePath()
         {
             for (int i = 0; i < this.nextPathNodes.Count; i++)

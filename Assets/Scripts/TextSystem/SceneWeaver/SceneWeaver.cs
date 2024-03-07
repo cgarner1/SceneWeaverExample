@@ -93,18 +93,13 @@ namespace Assets.Scripts.TextSystem.SceneWeaver {
         }
         */
 
-        public void ChooseOption(OptionDialogueNode chosenOption)
+        public void ChooseOption(int dSetId, OptionDialogueNode chosenOption)
         {
+            
             FactLibrary.GetInstance().UpdateFacts(chosenOption.FactUpdates);
-            // TODO -> head to the path determined by clicking a choice.
-            // TODO -> need to notify Typewriter to stop awaiting choice.
-
-
-            // TODO: handle choices in DSet:
-            // currentPathNode = chosenOption.NextPathNode;
-            // we need to inject the view with new choice, but new path is DOne
-            throw new System.NotImplementedException("Need to have DSets handle choice path choosing.");
-
+            dSetMap[dSetId].ChooseOption(chosenOption); // moves to dialogue node, still need to progress past this.
+            //dSetMap[dSetId].Next();
+            
         }
 
         public DialogueNode GetNextPathNodeByRule()

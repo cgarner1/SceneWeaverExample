@@ -11,6 +11,7 @@ using Assets.Scripts.Facts.Models;
 using Assets.Scripts.TextSystem.Models.Dialogue;
 using Assets.Scripts.TextSystem.SceneWeaver;
 using Assets.Scripts.Facts.Utils;
+using UnityEngine;
 
 namespace Assets.Scripts.TextSystem.Choices
 {
@@ -56,7 +57,8 @@ namespace Assets.Scripts.TextSystem.Choices
 
             // step4: parse paths. and create inner graph structure
             Dictionary<string, List<XmlNode>> optionChildMap = new Dictionary<string, List<XmlNode>>();
-            HashSet<string> validOptionChildNodes = new HashSet<string>() { Constants.CHOOSE_CHECK_TAG, Constants.PATH_TAG, Constants.TEXT_TAG, Constants.DLINE_TAG, Constants.DISPLAY_CHECK_TAG, Constants.UPDATE_TAG };
+            // pretty sure this allows... everything now...? no need to have this.
+            HashSet<string> validOptionChildNodes = new HashSet<string>() { Constants.CHOOSE_CHECK_TAG, Constants.PATH_TAG, Constants.TEXT_TAG, Constants.DLINE_TAG, Constants.DISPLAY_CHECK_TAG, Constants.UPDATE_TAG, Constants.BRANCH_TAG };
             foreach (string s in validOptionChildNodes)
             {
                 optionChildMap[s] = new List<XmlNode>();
@@ -81,13 +83,17 @@ namespace Assets.Scripts.TextSystem.Choices
 
             // step 2:handle each as needed.
 
+            /* TODO -> this block will cause all dialogue lines to be double added, as DialogueSet ALSO adds lines, frustratingly. 
+             * Need to eventually ONLY have inside constructor, but currently, all logic for adding lines to a node are handled in DialogueSet.cs after commenting out the below block.
             // all line tags are text that plays after choosing a choice.
+            
             foreach (XmlNode lineNode in optionChildMap[Constants.DLINE_TAG])
             {
 
                 DialogueLine newLine = new DialogueLine(lineNode);
                 this.AddDialogueElement(newLine);
             }
+            */
 
             foreach (XmlNode updateNode in optionChildMap[Constants.UPDATE_TAG])
             {
@@ -207,9 +213,8 @@ namespace Assets.Scripts.TextSystem.Choices
 
         public void OnClick()
         {
-            SceneWeaver.SceneWeaver.GetInstance().ChooseOption(this);
-            //SceneWeaver.GetInstance().ChooseOption(this);
-            UIController.Instance.InsertNextDialogueElementFromChoice(this);
+            UIController.Instance.InsertNextDialogueElementFromChoice(this, 1);
+            Debug.Log($"Chose option:{this.IdxInParentNode} -- {this.displayText}");
         }
 
 

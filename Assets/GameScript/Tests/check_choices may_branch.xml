@@ -1,10 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <dset id="1" code="Human Readable name" pull="sequential" textSpeed="1" >
+  <line textSpeed="4" speakerId="jfhsba" >
+    <text>
+      text branching choices.  
+    </text>
+    
+  </line>
   <choice>
     <option displayCheckType="any" chooseCheckType="any">
       <choiceCheck fact="FACT_CODE" op="gt" val="17"/>
       <text>Should not be choosable based on facts.</text>
-        <line textSpeed="2" speakerId="ZUES">
+        <line textSpeed="4" speakerId="ZUES">
           <text>text1 chosen.</text>
         </line>
         <line textSpeed="2" speakerId="ZUES">
@@ -16,22 +22,25 @@
       <choiceCheck fact="FACT_CODE2" op="eq" val="1"/>
       <displayCheck fact="FACT_CODE3" op="lte" val="1" />
       <text>displayed and choosable</text>
-        <line textSpeed="2" speakerId="ZUES">
-          <text textSpeed="2" speakerId="ZUES">option2 chosen.</text>
-        </line>
-        <line textSpeed="1" speakerId="Whoever">
-          <text>testing pathing within a choice selection</text>
-        </line>
-        <branch>
-          <path checkType="any">
-            <check fact="fact_000" op="eq" val="1"/>
-            <line>This branch should show.</line>
-          </path>
-          <path checkType="any">
-            <check fact="fact_000" op="eq" val="120"/>
-            <line>This branch should not show.</line>
-          </path>
-        </branch>
+      <line textSpeed="4" speakerId="ZUES">
+        <text textSpeed="2" speakerId="ZUES">line 1: option2 chosen.</text>
+      </line>
+      <line textSpeed="4" speakerId="Whoever2">
+        <text>line2: testing pathing within a choice selection</text>
+      </line>
+      <line textSpeed="4" speakerId="Whoever3">
+        <text>line3</text>
+      </line>
+      <branch>
+        <path checkType="any">
+          <check fact="fact_000" op="eq" val="0"/>
+          <line>This branch should show.</line>
+        </path>
+        <path checkType="any">
+          <check fact="fact_000" op="eq" val="120"/>
+          <line>This branch should not show.</line>
+        </path>
+      </branch>
       
     </option>
   </choice>

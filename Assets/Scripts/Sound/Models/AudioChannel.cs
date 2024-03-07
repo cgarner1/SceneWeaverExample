@@ -31,12 +31,12 @@ namespace Assets.Scripts.Sound.Models
 
         public void StopAllAudioOnChannel()
         {
-
+            throw new NotImplementedException("have not implemented stopAllAudio for a channel... Guess I'll only need this during a pause screen?");
         }
 
         public void PlayRepeating(Models.Sound sound, float repeatInterval)
         {
-            
+            throw new NotImplementedException("seems like music is the only thing that requires this...");
         }
 
 

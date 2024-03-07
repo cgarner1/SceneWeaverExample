@@ -107,9 +107,6 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                         dNodeList.Add(new DialogueNode());
                         break;
                 }
-
-
-
             }
         }
 
@@ -134,6 +131,7 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                 // there will never be an option and under it option, or path and under it another path.
                 DialogueNodeAbstract newNode = DialogueNodeFactory.CreateDNode(branchingOptionXML);
                 parent.nextPathNodes.Add(newNode);
+                newNode.IdxInParentNode = parent.nextPathNodes.Count - 1;
 
                 // at this point, we parse the current path node, adding checks and lines. If there is another path, we recurse
                 foreach(XmlNode branchingOptionChild in branchingOptionXML.ChildNodes)
@@ -197,7 +195,7 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                 }
             }
 
-            if (progressIdx && nextElement != null)
+            if (progressIdx && nextElement != null && nextElement is not ChoiceSet)
             {
                 try
                 {
@@ -272,6 +270,15 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                 Debug.Log("exhausted.");
                 throw new DialogueExaustedException("have not implemented code to handle the exaustion of a dialogue set. TODO: send an event to notify that this dialogue is over.");
             }
+        }
+
+        /// <summary>
+        /// Set DIRECTLY to a new node. This is done almost exclusively for OptionNodes.
+        /// </summary>
+        public void ChooseOption(OptionDialogueNode optionNode)
+        {
+            dNodeList[currentDNodeIdx] = optionNode;
+            dNodeList[currentDNodeIdx].ResetDElementsIdx();
         }
 
         

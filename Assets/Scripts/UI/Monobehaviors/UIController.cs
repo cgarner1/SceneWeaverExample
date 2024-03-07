@@ -83,10 +83,19 @@ public class UIController : MonoBehaviour
     }
 
     // TODO
-    public void InsertNextDialogueElementFromChoice(OptionDialogueNode chosenOption)
+    public void InsertNextDialogueElementFromChoice(OptionDialogueNode chosenOption, int dSetId)
     {
-        throw new System.NotImplementedException("Need to re-implement inserting choices in Sceneweaver.");
-        return;
+        SceneWeaver.GetInstance().ChooseOption(dSetId, chosenOption); // handles moving idx to next line :)
+        IDialogueModel line = SceneWeaver.GetInstance().GetNextDialogueElement(dSetId); // we don't want to call this when we see a choice!!!
+        manager.InsertVisualElementIntoDialogueSecition(line.Renderer.GetVisualElement());
+
+        typeWriter.IsAwaitingChoice = false;
+        
+        if (line is DialogueLine)
+        {
+            typeWriter.BeginTypeWriting((DialogueLine)line);
+        }
+
         /*
         IDialogueModel line = SceneWeaver.GetInstance().GetNextDialogueElementFromOption(chosenOption);
         manager.InsertVisualElementIntoDialogueSecition(line.Renderer.GetVisualElement());

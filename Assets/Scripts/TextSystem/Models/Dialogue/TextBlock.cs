@@ -12,9 +12,11 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
         public string HexColor { get; private set; } // optional -> choose default 
         public string Text { get; private set; }
         public float? TextSpeed { get; private set; }
+        public List<string> Events { get; private set; }
 
         public TextBlock(XmlNode textNode)
         {
+            Events = new List<string>();
             if(textNode.Attributes["prePause"] != null)
             {
                 
@@ -23,6 +25,11 @@ namespace Assets.Scripts.TextSystem.Models.Dialogue
                     PrePause = prePause;
                 }
                     
+            }
+
+            if(textNode.Attributes["event"] != null)
+            {
+                Events = new List<string>(textNode.Attributes["event"].Value.Split('|'));
             }
 
             if (textNode.Attributes["textSpeed"] != null)

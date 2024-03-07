@@ -16,7 +16,8 @@ public class SpeachTester : MonoBehaviour
         // SceneWeaver.GetInstance().LoadDialogueSet("Tests/TestFactsUpdateByLine_1");
         // SceneWeaver.GetInstance().LoadDialogueSet("Tests/TestChoicesAndLinesRender");
         // SceneWeaver.GetInstance().LoadDialogueSet("Tests/check_basic_line_ordering");
-        SceneWeaver.GetInstance().LoadDialogueSet("Tests/check_choices may_branch");
+        // SceneWeaver.GetInstance().LoadDialogueSet("Tests/check_choices may_branch");
+        SceneWeaver.GetInstance().LoadDialogueSet("Tests/check_events_fire_from_text");
     }
 
     // Update is called once per frame

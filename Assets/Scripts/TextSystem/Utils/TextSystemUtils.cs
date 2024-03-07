@@ -47,24 +47,26 @@ namespace Assets.Scripts.TextSystem.Utils
 
         public static bool CheckRules(List<FactBasedTextRule> rules, RuleCheckType checkType)
         {
+            if (checkType == RuleCheckType.noCheck) return true;
+
+            bool anyResult = false;
+            bool allResult = true;
             
             foreach(FactBasedTextRule rule in rules)
             {
 
-                if (checkType == RuleCheckType.noCheck)
+                if (checkType == RuleCheckType.any)
                 {
-                    return true;
+                    anyResult = CheckRule(rule) || anyResult;
+                }
                 
-                } else if (checkType == RuleCheckType.any && CheckRule(rule))
+                if(checkType == RuleCheckType.all)
                 {
-                    return true;
-                } else if(checkType == RuleCheckType.all && !CheckRule(rule))
-                {
-                    return false;
+                    anyResult = anyResult && CheckRule(rule);
                 }
             }
 
-            return true;
+            return checkType == RuleCheckType.any ? anyResult : allResult;
         }
         
         public static TextSystemEnums.RuleCheckType GetCheckType(string checkTypeVal)

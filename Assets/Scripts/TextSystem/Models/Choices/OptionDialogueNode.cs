@@ -108,6 +108,11 @@ namespace Assets.Scripts.TextSystem.Choices
                 this.displayText = textNode.InnerText;
             }
 
+            foreach(XmlNode displayCheck in optionChildMap[Constants.DISPLAY_CHECK_TAG])
+            {
+                this.AddDisplayRule(new FactBasedTextRule(displayCheck.Attributes));
+            }
+
             // path nodes under this are handled identically to a branch, but require a wrapper.
             // uuuuuh wait this seems like a bad idea. We should have a branch wrapping the path like everything else.
             /*
